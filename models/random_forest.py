@@ -52,7 +52,6 @@ def random_forest():
         rf_classifier.fit(X_train, y_train)
         # Save the model to a file
         model_path = os.path.join(get_path(), f'rf_classifier_fold_{fold}.joblib')
-        print(model_path)
         joblib.dump(rf_classifier, model_path)
 
         train_predictions = rf_classifier.predict(X_train)
