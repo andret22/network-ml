@@ -3,10 +3,10 @@ import pandas as pd
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.model_selection import KFold
 from sklearn.preprocessing import LabelEncoder
-from sklearn.metrics import accuracy_score
+from sklearn.metrics import accuracy_score, classification_report
 import os
 import joblib
-from cache import get_path
+from cache.random_forest import get_path
 
 def random_forest():
     # Carrega arquivo CSV
@@ -42,6 +42,7 @@ def random_forest():
 
     train_accuracies = []
     test_accuracies = []
+    classification_reports = []
     #Divide os dados em folds
     for fold, (train_index, test_index) in enumerate(kf.split(X)):
         X_train, X_test = X[train_index], X[test_index]
@@ -49,9 +50,9 @@ def random_forest():
 
         rf_classifier = RandomForestClassifier(n_estimators=100, random_state=2)
         rf_classifier.fit(X_train, y_train)
-
         # Save the model to a file
-        model_path = f'cache/rf_classifier_fold_{fold}.joblib'
+        model_path = os.path.join(get_path(), f'rf_classifier_fold_{fold}.joblib')
+        print(model_path)
         joblib.dump(rf_classifier, model_path)
 
         train_predictions = rf_classifier.predict(X_train)
@@ -62,9 +63,24 @@ def random_forest():
         test_accuracy = accuracy_score(y_test, test_predictions)
         test_accuracies.append(test_accuracy)
 
+         # Generate classification report
+        report = classification_report(y_test, test_predictions, output_dict=True)
+        classification_reports.append(report)
 
         print(f"Fold {len(train_accuracies)} - Acurácia de treinamento: {train_accuracy:.4f}, Acurácia de teste: {test_accuracy:.4f}")
 
-    # Print average accuracies
+    # Acurácia média de treinamento e de teste
     print(f"Acurácia média de treinamento: {np.mean(train_accuracies):.4f}")
     print(f"Acurácia média de teste: {np.mean(test_accuracies):.4f}")
+
+    # Demais dados
+    overall_report = {
+        'precision': np.mean([report['weighted avg']['precision'] for report in classification_reports]),
+        'recall': np.mean([report['weighted avg']['recall'] for report in classification_reports]),
+        'f1-score': np.mean([report['weighted avg']['f1-score'] for report in classification_reports])
+    }
+
+    print("Relatório geral:")
+    print(f"Precisão: {overall_report['precision']:.4f}")
+    print(f"Revocação: {overall_report['recall']:.4f}")
+    print(f"f1-score: {overall_report['f1-score']:.4f}")
