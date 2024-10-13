@@ -399,3 +399,5 @@ FodyWeavers.xsd
 
 # python venv
 mlvenv/
+# cached models
+*.joblib
