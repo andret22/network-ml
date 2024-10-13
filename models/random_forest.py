@@ -62,7 +62,7 @@ def random_forest():
         test_accuracy = accuracy_score(y_test, test_predictions)
         test_accuracies.append(test_accuracy)
 
-         # Generate classification report
+         # Relatório de classificação
         report = classification_report(y_test, test_predictions, output_dict=True)
         classification_reports.append(report)
 
